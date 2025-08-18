@@ -144,3 +144,43 @@ console.log(festiveCoupon(120)); // ✅ FESTIVE20 applied! Final price: $100 (Re
 // Every coupon is a self-contained system.
 // No global variables needed to track counts.
 // Super easy to add new coupons by just calling createCoupon
+
+
+
+// 4. API Caching System
+
+// APIs are expensive (time & money).
+// If the same data is requested multiple times, we should cache it instead of fetching again.
+// Cache must be private (not exposed globally).
+
+function createAPICache(fetchFunction) {
+    const cache = {}; // private cache
+  
+    return async function(url) {
+      if (cache[url]) {
+        console.log("📦 Returning from cache:", url);
+        return cache[url];
+      }
+  
+      console.log("🌐 Fetching from API:", url);
+      const result = await fetchFunction(url);
+      cache[url] = result; // store result in closure
+      return result;
+    }
+  }
+
+async function fakeFetch(url) {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(`Data from ${url}`), 1000);
+    });
+  }
+  
+  // Create cached fetch
+  const cachedFetch = createAPICache(fakeFetch);
+  
+  // Usage
+  (async () => {
+    console.log(await cachedFetch("https://api.com/users/1"));
+    console.log(await cachedFetch("https://api.com/users/1")); // Cached
+    console.log(await cachedFetch("https://api.com/users/2"));
+  })();
